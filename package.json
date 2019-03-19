@@ -1,5 +1,5 @@
 {
-  "name": "nimbus-server",
+  "name": "nimbus",
   "version": "1.0.0",
   "private": true,
   "description": "a GraphQL Framework for a fast and reliable server",
