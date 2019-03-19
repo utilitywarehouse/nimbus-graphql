@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "a GraphQL Framework for a fast and reliable server",
-  "main": "dist",
+  "main": "dist/index.js",
   "repository": "https://github.com/utilitywarehouse/nimbus-server",
   "author": "Utilitywarehouse",
   "license": "ISC",
