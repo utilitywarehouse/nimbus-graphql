@@ -1,10 +1,10 @@
 {
-  "name": "nimbus",
+  "name": "nimbus-graphql",
   "version": "1.0.0",
   "private": true,
   "description": "a GraphQL Framework for a fast and reliable server",
-  "main": "dist/index.js",
-  "repository": "https://github.com/utilitywarehouse/nimbus-server",
+  "main": "index.js",
+  "repository": "https://github.com/utilitywarehouse/nimbus",
   "author": "Utilitywarehouse",
   "license": "ISC",
   "scripts": {
@@ -15,7 +15,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "prepublish": "npx build && mv dist/* . && rm -rf dist",
+    "postpublish": "rm -rf index.js index.d.ts ./config ./errors ./framework ./gql ./gprc ./http ./logger ./operational ./repository"
   },
   "dependencies": {
     "apollo-server-express": "^2.4.8",
