@@ -1,6 +1,7 @@
+/// <reference types="grpc" />
 import * as grpc from 'grpc';
 import {Pool, PoolStatus} from './pool';
-import {CheckerReporter} from '../operational/checker';
+import {CheckerReporter} from '../operational';
 import {RepositoryContext} from '../repository';
 
 export class GrpcClient<Client extends grpc.Client> {

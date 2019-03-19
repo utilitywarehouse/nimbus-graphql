@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql';
 import * as fs from 'fs';
 import * as merge from 'lodash.merge';
 import { Container } from 'typedi';
@@ -6,7 +7,6 @@ import { GraphQLDate, GraphQLDateTime, GraphQLTime } from 'graphql-iso-date';
 import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
 import { ApolloServer, Config, CorsOptions } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { GQLError } from './errors';
 
 import { ResolverRegistry } from './resolver.registry';

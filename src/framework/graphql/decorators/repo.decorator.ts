@@ -1,4 +1,4 @@
-import { PullValue } from '../../../graphql';
+import { PullValue } from '../../../gql';
 import { AbstractRepository, RepositoryContext, RepositoryLocator } from '../../../repository';
 
 interface RepositoryGraphQLContext {

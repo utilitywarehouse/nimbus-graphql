@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Before } from '../../../graphql';
+import { Before } from '../../../gql';
 
 export const MustAuth = (...scopes: string[]): any => {
   return Before<any, any, any>((source, args, context, _) => {

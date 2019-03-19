@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Before, NullError } from '../../../graphql';
+import { Before, NullError } from '../../../gql';
 
 export const IfAuth = (...scopes: string[]): any => {
   return Before<any, any, any>((source, args, context, _) => {
