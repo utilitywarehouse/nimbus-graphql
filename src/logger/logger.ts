@@ -33,8 +33,8 @@ export class LoggerFactory {
         });
 
         logger.addSerializers({
-            err: (error) => error.render ? error.render() : error,
-            error: (error) => error.render ? error.render() : error,
+            err: (error) => error.render ? error.render() : error.message,
+            error: (error) => error.render ? error.render() : error.message,
         });
 
         return logger;
