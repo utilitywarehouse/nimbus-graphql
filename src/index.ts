@@ -1,3 +1,4 @@
+export * from './repository.decorators';
 export * from './resolver.decorators';
 export * from './resolver.interface';
 export * from './resolver.metadata';

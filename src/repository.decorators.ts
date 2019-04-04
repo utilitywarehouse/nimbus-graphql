@@ -1,5 +1,5 @@
-import { AbstractRepository, RepositoryContext, RepositoryLocator } from '.';
-import { PullValue } from "../resolver.decorators";
+import { AbstractRepository, RepositoryContext, RepositoryLocator } from './repository';
+import { PullValue } from "./resolver.decorators";
 
 interface RepositoryGraphQLContext {
   repositoryLocator: RepositoryLocator;
