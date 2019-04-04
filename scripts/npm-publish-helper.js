@@ -21,11 +21,11 @@ function buildTS() {
  * @param packagePaths
  * @returns {Promise<void>}
  */
-async function moveFileToPackageRoot(packagePaths) {
+async function copyFileToPackageRoot(packagePaths) {
     // Move dist packages to project root.
     const rootPackages = packagePaths
         .map((packagePath) => {
-        return promisyCommand(`mv dist/${path.basename(packagePath)} .`)
+        return promisyCommand(`cp -R dist/${path.basename(packagePath)} .`)
             .then(() => {
             return packagePath;
         });
@@ -67,7 +67,7 @@ function promisyCommand(bashCommand) {
 }
 
 module.exports = {
-    moveFileToPackageRoot,
+    copyFileToPackageRoot,
     removeArtifacts,
     buildTS,
 };

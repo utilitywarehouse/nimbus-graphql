@@ -1,13 +1,13 @@
 const {removeArtifacts} = require('./npm-publish-helper');
-
+const path = require('path');
 const glob = require('glob');
 
 const distCodePath = path.resolve(__dirname, '..', 'dist');
 
 run().then(() => {
-    console.log("Done");
+    console.log("Post publish done!");
 }).catch(() => {
-    console.error("Command errored");
+    console.error("Post published errored");
 });
 
 async function run() {
