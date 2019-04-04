@@ -1,4 +1,4 @@
-const {moveFileToPackageRoot, buildTS, removeArtifacts} = require('./npm-publish-helper');
+const {removeArtifacts} = require('./npm-publish-helper');
 
 const glob = require('glob');
 
@@ -11,13 +11,6 @@ run().then(() => {
 });
 
 async function run() {
-    await buildTS();
     const packages = glob.sync(path.join(distCodePath, '*'));
-
-    try {
-        await moveFileToPackageRoot(packages);
-    } catch (e) {
-        await removeArtifacts(packages);
-        throw e;
-    }
+    await removeArtifacts(packages);
 }
