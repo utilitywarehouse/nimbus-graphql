@@ -8,11 +8,17 @@ export class ResolverMetadata {
   public methodParamOverrides: { [k: string]: any } = {};
   public type: string;
   public queries: Array<{ name: string, method: string }> = [];
+  public subscriptions: Array<{name: string, method: string}> = [];
   public mutations: Array<{ name: string, method: string }> = [];
   public mappedResolvers: Array<{ name: string, method: string }> = [];
 
   public beforeHooks: Array<{ method: string, hook: IFieldResolver<any, any, any> }> = [];
   public afterHooks: Array<{ method: string, hook: (result: any) => any }> = [];
+
+  addSubscription(name: string, method: string) {
+    this.subscriptions.push({name, method});
+    return this;
+  }
 
   addMutation(name: string, method: string) {
     this.mutations.push({ name, method });

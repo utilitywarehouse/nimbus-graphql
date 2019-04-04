@@ -2,6 +2,7 @@ export interface AuthToken {
   isValid(): boolean;
   asScopes(scopes: string[]): boolean;
   asString(): string;
+  asHeader(): string;
 }
 
 export class RepositoryContext {

@@ -18,7 +18,7 @@ export class GrpcClient<Client extends grpc.Client> {
 
         const scopedInstance = new constructor(this.clientProvider);
         scopedInstance.setDefaultMetadata({
-            authorization: context.authToken && context.authToken.asString(),
+            authorization: context.authToken && context.authToken.asHeader(),
             correlationId: context.correlationId,
         });
 

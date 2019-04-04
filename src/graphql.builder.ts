@@ -1,18 +1,19 @@
-import { GraphQLError } from 'graphql';
+import { GraphQLError } from "graphql";
 import * as fs from 'fs';
 import * as merge from 'lodash.merge';
 import { Container } from 'typedi';
 import { GraphQLDate, GraphQLDateTime, GraphQLTime } from 'graphql-iso-date';
-
+import {SubscriptionServerOptions} from 'apollo-server-core';
 import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
 import { ApolloServer, Config, CorsOptions } from 'apollo-server-express';
-import { GQLError } from './errors';
+import {createServer as createHttpServer, Server} from 'http';
 
 import { ResolverRegistry } from './resolver.registry';
 import { ResolverInterface } from './resolver.interface';
 import { ResolverToken } from './resolver.token';
-import { Application } from '../framework';
+import { Application } from './framework';
+import { GQLError } from "./errors/gql.error";
 
 export interface GraphQLOperations {
   onResponse(response: any);
@@ -54,9 +55,10 @@ const ExtensionInjectCorrelationIdToError = {
   },
 };
 
-export class Graphql {
+export class GraphQLBuilder {
   private readonly schemaPath: string;
   private gqlMetrics?: GraphQLOperations;
+  private subOpts?: Partial<SubscriptionServerOptions>;
   private gqlContext: GraphQLContextBuilder;
   private app: Application;
 
@@ -72,6 +74,11 @@ export class Graphql {
 
   context(graphqlContext: GraphQLContextBuilder) {
     this.gqlContext = graphqlContext;
+    return this;
+  }
+
+  subscriptions(opt: Partial<SubscriptionServerOptions>): GraphQLBuilder {
+    this.subOpts = opt;
     return this;
   }
 
@@ -111,6 +118,7 @@ export class Graphql {
         }
         return response;
       },
+      subscriptions: this.subOpts,
     }, customConfig || {});
   }
 
@@ -119,6 +127,12 @@ export class Graphql {
     const apollo = new ApolloServer(config);
 
     apollo.applyMiddleware({ app: this.app.express, path: '/' });
+
+    if (this.subOpts) {
+      apollo.installSubscriptionHandlers(
+          createHttpServer(this.app.express)
+      );
+    }
 
     return apollo;
   }

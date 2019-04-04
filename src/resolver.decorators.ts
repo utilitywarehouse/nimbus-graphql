@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import { IFieldResolver } from 'graphql-tools';
 import { ResolverToken } from './resolver.token';
 import { ResolverMetadata } from './resolver.metadata';
+import { NullError } from "./errors/null.error";
 
 export const Resolver = (type?: string): ClassDecorator => (target) => {
   if (type) {
@@ -21,6 +22,11 @@ export const Query = (query?: string) => (target, propertyKey: string) => {
 
 export const Mutation = (mutation?: string) => (target, propertyKey: string) => {
   ResolverMetadata.for(target).addMutation(mutation || propertyKey, propertyKey);
+  return target;
+};
+
+export const Subscription = (subscription?: string) => (target, propertyKey: string) => {
+  ResolverMetadata.for(target).addSubscription(subscription || propertyKey, propertyKey);
   return target;
 };
 
@@ -54,6 +60,24 @@ export const Context = (name: string) => PullValue(() => {
     return context[name];
   };
 });
+
+export const IfAuth = (...scopes: string[]): any => {
+  return Before<any, any, any>((source, args, context, _) => {
+    if (!context.config.get('auth.bypass')) {
+      if (!context.authValidator.willPass(context.authToken, scopes)) {
+        throw new NullError();
+      }
+    }
+  });
+};
+
+export const MustAuth = (...scopes: string[]): any => {
+  return Before<any, any, any>((source, args, context, _) => {
+    if (!context.config.get('auth.bypass')) {
+      context.authValidator.mustPass(context.authToken, scopes);
+    }
+  });
+};
 
 export const Before = <TSource, TContext, TArgs = {
   [argument: string]: any;

@@ -1,5 +1,5 @@
-import { PullValue } from '../../../gql';
-import { AbstractRepository, RepositoryContext, RepositoryLocator } from '../../../repository';
+import { AbstractRepository, RepositoryContext, RepositoryLocator } from '.';
+import { PullValue } from "../resolver.decorators";
 
 interface RepositoryGraphQLContext {
   repositoryLocator: RepositoryLocator;

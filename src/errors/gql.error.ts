@@ -1,4 +1,4 @@
-import {BaseError} from '../../errors/base';
+import {BaseError} from './base';
 import {GraphQLError} from 'graphql';
 
 export class GQLError extends BaseError {

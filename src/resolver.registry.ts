@@ -3,7 +3,7 @@ import { ResolverInterface } from './resolver.interface';
 import { ResolverMetadata } from './resolver.metadata';
 import * as set from 'lodash.set';
 import * as get from 'lodash.get';
-import { NullError } from './errors';
+import { NullError } from "./errors/null.error";
 
 @Service()
 export class ResolverRegistry {
@@ -98,6 +98,11 @@ export class ResolverRegistry {
 
       meta.mutations.forEach(({ name, method }) => {
         safeSet(`Mutation.${name}`, this.method(meta, r, method));
+        usedProps.push(method);
+      });
+
+      meta.subscriptions.forEach(({name, method}) => {
+        safeSet(`Subscription.${name}`, {subscribe: this.method(meta, r, method)});
         usedProps.push(method);
       });
 
