@@ -1,4 +1,5 @@
 import { Container, ContainerInstance } from 'typedi';
+import {createServer as createHttpServer, Server} from 'http';
 import Logger = require('bunyan');
 import { Module } from './module';
 import { Config } from '../config';
@@ -14,6 +15,7 @@ export class Application extends ContainerInstance {
   basePath: string;
   containerId: symbol;
   express: Express;
+  server: Server;
 
   constructor(basePath: string) {
     const containerID = Symbol();
@@ -22,6 +24,7 @@ export class Application extends ContainerInstance {
     this.modules = [];
     this.containerId = containerID;
     this.express = createExpressApp();
+    this.server = createHttpServer(this.express)
   }
 
   /**
@@ -60,7 +63,7 @@ export class Application extends ContainerInstance {
    * @param listeningListener
    */
   listen(handle: any, listeningListener?: Function) {
-    return this.express.listen(handle, listeningListener);
+    return this.server.listen(handle, listeningListener);
   }
 
   /**

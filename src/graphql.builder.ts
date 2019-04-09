@@ -130,7 +130,7 @@ export class GraphQLBuilder {
 
     if (this.subOpts) {
       apollo.installSubscriptionHandlers(
-          createHttpServer(this.app.express)
+          this.app.server
       );
     }
 
