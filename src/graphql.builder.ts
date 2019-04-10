@@ -3,11 +3,11 @@ import * as fs from 'fs';
 import * as merge from 'lodash.merge';
 import { Container } from 'typedi';
 import { GraphQLDate, GraphQLDateTime, GraphQLTime } from 'graphql-iso-date';
-import {SubscriptionServerOptions} from 'apollo-server-core';
+import { SubscriptionServerOptions } from 'apollo-server-core';
 import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
 import { ApolloServer, Config, CorsOptions } from 'apollo-server-express';
-import {createServer as createHttpServer, Server} from 'http';
+import { Server } from 'http';
 
 import { ResolverRegistry } from './resolver.registry';
 import { ResolverInterface } from './resolver.interface';
@@ -56,13 +56,13 @@ const ExtensionInjectCorrelationIdToError = {
 };
 
 export class GraphQLBuilder {
-  private readonly schemaPath: string;
+  private readonly schemaPath?: string;
   private gqlMetrics?: GraphQLOperations;
   private subOpts?: Partial<SubscriptionServerOptions>;
   private gqlContext: GraphQLContextBuilder;
   private app: Application;
 
-  constructor(container: Application, schemaPath: string) {
+  constructor(container: Application, schemaPath?: string) {
     this.schemaPath = schemaPath;
     this.app = container;
   }
@@ -86,7 +86,9 @@ export class GraphQLBuilder {
     cors?: CorsOptions | boolean;
   } {
 
-    const typeDefs = JSON.parse(fs.readFileSync(this.schemaPath, 'utf8'));
+    const typeDefs = this.schemaPath ?
+        JSON.parse(fs.readFileSync(this.schemaPath, 'utf8')) :
+        customConfig.typeDefs;
 
     return merge({
       typeDefs,
