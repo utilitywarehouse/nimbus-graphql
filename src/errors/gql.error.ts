@@ -33,9 +33,12 @@ export class GQLError extends BaseError {
         details.path = this.gql.path;
         details.extensions = this.gql.extensions;
         
+        details.extensions.exception.type = this.type
+        details.extensions.exception.message = this.message
+
         if (this.previous && this.previous.render) {
             details.extensions.exception.previous = this.previous.render()
-        } else if (this.previous && this.previous.message)) {
+        } else if (this.previous && this.previous.message) {
             details.extensions.exception.previous = this.previous.message
         }
         
