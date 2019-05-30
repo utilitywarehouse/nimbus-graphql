@@ -3,6 +3,7 @@ export interface AuthToken {
   asScopes(scopes: string[]): boolean;
   asString(): string;
   asHeader(): string;
+  payload<T>(): T;
 }
 
 export class RepositoryContext {
