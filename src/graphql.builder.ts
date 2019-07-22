@@ -101,7 +101,7 @@ export class GraphQLBuilder {
           ...Container.getMany<ResolverInterface>(ResolverToken),
       ).scalars({
         JSON: GraphQLJSON,
-        Date: GraphQLDateTime,
+        Date: GraphQLDate,
         DateTime: GraphQLDateTime,
         Time: GraphQLTime,
         UUID: GraphQLUUID,
