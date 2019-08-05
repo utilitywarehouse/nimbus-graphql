@@ -72,6 +72,7 @@ export class Application extends ContainerInstance {
    */
   setLogger(logger: Logger) {
     this.set(LoggerToken, logger);
+    Container.set(LoggerToken, logger);
   }
 
   /**
