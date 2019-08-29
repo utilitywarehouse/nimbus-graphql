@@ -26,26 +26,26 @@ jobs:
     build:
         executor: nimbus-executor
         steps:
+            - checkout
             - attach_workspace:
                   at: /tmp/build
-            - checkout
             - run: yarn build
 
     lint:
         executor: nimbus-executor
         steps:
+            - checkout
             - attach_workspace:
                   at: /tmp/build
-            - checkout
             - run: yarn lint
 
 
     test:
         executor: nimbus-executor
         steps:
+            - checkout
             - attach_workspace:
                   at: /tmp/build
-            - checkout
             - run:
                 command: yarn test:ci
                 environment:
