@@ -21,7 +21,7 @@ jobs:
             - persist_to_workspace:
                   root: /tmp
                   paths:
-                      - build
+                      - build/*
 
     build:
         executor: nimbus-executor
