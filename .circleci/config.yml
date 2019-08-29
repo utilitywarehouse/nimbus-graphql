@@ -4,7 +4,7 @@ executors:
     nimbus-executor:
         docker:
             - image: circleci/node
-        working_directory: ~/build
+        working_directory: /tmp/build
 
 jobs:
     install:
@@ -19,7 +19,9 @@ jobs:
                   paths:
                       - ~/.cache/yarn
             - persist_to_workspace:
-                  root: ~/build
+                  root: /tmp
+                  paths:
+                      - build
 
     build:
         executor: nimbus-executor
