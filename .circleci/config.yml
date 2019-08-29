@@ -1,10 +1,14 @@
 version: 2
 
-jobs:
-    install:
-        working_directory: ~/build
+executors:
+    nimbus-executor:
         docker:
             - image: circleci/node
+        working_directory: ~/build
+
+jobs:
+    install:
+        executor: nimbus-executor
         steps:
             - checkout
             - restore_cache:
@@ -16,26 +20,20 @@ jobs:
                       - ~/.cache/yarn
 
     build:
-        working_directory: ~/build
-        docker:
-            - image: circleci/node
+        executor: nimbus-executor
         steps:
             - checkout
             - run: yarn build
 
     lint:
-        working_directory: ~/build
-        docker:
-            - image: circleci/node
+        executor: nimbus-executor
         steps:
             - checkout
             - run: yarn lint
 
 
     test:
-        working_directory: ~/build
-        docker:
-            - image: circleci/node
+        executor: nimbus-executor
         steps:
             - checkout
             - run:

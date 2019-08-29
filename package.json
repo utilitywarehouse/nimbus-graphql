@@ -9,8 +9,8 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc --outDir ./dist -d -p ./",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
-    "lint:fix": "./node_modules/.bin/eslint 'src/**/*.ts'  --fix",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts'  --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
