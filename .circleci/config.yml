@@ -28,6 +28,7 @@ jobs:
         steps:
             - attach_workspace:
                   at: /tmp/build
+            - checkout
             - run: yarn build
 
     lint:
@@ -35,6 +36,7 @@ jobs:
         steps:
             - attach_workspace:
                   at: /tmp/build
+            - checkout
             - run: yarn lint
 
 
@@ -43,6 +45,7 @@ jobs:
         steps:
             - attach_workspace:
                   at: /tmp/build
+            - checkout
             - run:
                 command: yarn test:ci
                 environment:
