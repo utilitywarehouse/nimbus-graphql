@@ -1,15 +1,15 @@
 import * as express from 'express';
-import {Request} from 'express';
-import {v4 as uuid} from 'uuid';
+import { Request } from 'express';
+import { v4 as uuid } from 'uuid';
 
-export const createExpressApp = () => {
+export const createExpressApp = (): express.Express => {
 
-    const app = express();
+  const app = express();
 
-    app.use((req: Request, _, next) => {
-        req.headers['X-Correlation-ID'] = req.headers['X-Correlation-ID'] || uuid();
-        next();
-    });
+  app.use((req: Request, _, next) => {
+    req.headers['X-Correlation-ID'] = req.headers['X-Correlation-ID'] || uuid();
+    next();
+  });
 
-    return app;
+  return app;
 };

@@ -1,11 +1,12 @@
-import { Container } from 'typedi';
+import { Container, ObjectType } from 'typedi';
 import { Application } from './application';
+import { Config } from '../config';
 
-export interface IModule {
-  register();
+export interface Module {
+  register(): void;
 }
 
-export abstract class Module implements IModule {
+export abstract class Module implements Module {
 
   app: Application;
 
@@ -24,14 +25,14 @@ export abstract class Module implements IModule {
     return this as any;
   }
 
-  abstract register();
+  // abstract register(): void;
 
   /**
    * Bind an abstract type to a resolved type
    * @param abstract
    * @param concrete
    */
-  bind(abstract: any, concrete: any) {
+  bind(abstract: any, concrete: any): Application {
     if (this.app.has(concrete) || typeof concrete === 'function') {
       return this.app.set(abstract, this.get(concrete));
     }
@@ -45,7 +46,7 @@ export abstract class Module implements IModule {
    * @param abstract
    * @param concrete
    */
-  bindIf(condition, abstract: any, concrete: any) {
+  bindIf(condition: boolean, abstract: any, concrete: any): any {
     if (condition) {
       return this.bind(abstract, concrete);
     }
@@ -56,12 +57,12 @@ export abstract class Module implements IModule {
    * @param abstract
    * @param concrete
    */
-  bindIfDev(abstract: any, concrete: any) {
+  bindIfDev(abstract: any, concrete: any): any {
     const parentClass = this.constructor as typeof Module;
     return this.bindIf(
-        parentClass.dev && this.config().get('service.isDev'),
-        abstract,
-        concrete,
+      parentClass.dev && this.config().get('service.isDev'),
+      abstract,
+      concrete,
     );
   }
 
@@ -69,7 +70,7 @@ export abstract class Module implements IModule {
    * Import classes into the container
    * @param factories
    */
-  import(factories) {
+  import(factories: Function[]): void {
     Container.import(factories);
   }
 
@@ -77,14 +78,14 @@ export abstract class Module implements IModule {
    * Retrieve dependency bound to the container
    * @param service
    */
-  get<T>(service) {
+  get<T>(service: ObjectType<T>): T {
     return this.app.get<T>(service);
   }
 
   /**
    * Return global configuration object
    */
-  config() {
+  config(): Config {
     return this.app.config();
   }
 }

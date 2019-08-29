@@ -1,22 +1,21 @@
-import { GraphQLError } from "graphql";
+import { GraphQLError } from 'graphql';
 import * as fs from 'fs';
-import * as merge from 'lodash.merge';
+import { merge } from 'lodash';
 import { Container } from 'typedi';
 import { GraphQLDate, GraphQLDateTime, GraphQLTime } from 'graphql-iso-date';
 import { SubscriptionServerOptions } from 'apollo-server-core';
 import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
 import { ApolloServer, Config, CorsOptions } from 'apollo-server-express';
-import { Server } from 'http';
 
 import { ResolverRegistry } from './resolver.registry';
 import { ResolverInterface } from './resolver.interface';
 import { ResolverToken } from './resolver.token';
 import { Application } from './framework';
-import { GQLError } from "./errors/gql.error";
+import { GQLError } from './errors';
 
 export interface GraphQLOperations {
-  onResponse(response: any);
+  onResponse(response: any): void;
 
   onError(error: GQLError): void;
 }
@@ -26,7 +25,7 @@ export interface GraphQLContextBuilder {
 }
 
 const ExtensionInjectCorrelationIdToError = {
-  willSendResponse(o) {
+  willSendResponse(o: any): GraphQLError | any {
 
     const { context, graphqlResponse } = o;
 
@@ -41,13 +40,13 @@ const ExtensionInjectCorrelationIdToError = {
       ext.correlationId = context.req.headers['X-Correlation-ID'];
 
       return new GraphQLError(
-          e.message,
-          e.nodes,
-          e.source,
-          e.positions,
-          e.path,
-          e.originalError,
-          ext,
+        e.message,
+        e.nodes,
+        e.source,
+        e.positions,
+        e.path,
+        e.originalError,
+        ext,
       );
     });
 
@@ -67,12 +66,12 @@ export class GraphQLBuilder {
     this.app = container;
   }
 
-  metrics(operations: GraphQLOperations) {
+  metrics(operations: GraphQLOperations): GraphQLBuilder {
     this.gqlMetrics = operations;
     return this;
   }
 
-  context(graphqlContext: GraphQLContextBuilder) {
+  context(graphqlContext: GraphQLContextBuilder): GraphQLBuilder {
     this.gqlContext = graphqlContext;
     return this;
   }
@@ -87,18 +86,18 @@ export class GraphQLBuilder {
   } {
 
     const typeDefs = this.schemaPath ?
-        JSON.parse(fs.readFileSync(this.schemaPath, 'utf8')) :
-        customConfig.typeDefs;
+      JSON.parse(fs.readFileSync(this.schemaPath, 'utf8')) :
+      customConfig.typeDefs;
 
     return merge({
       typeDefs,
 
-      extensions: [() => ExtensionInjectCorrelationIdToError],
-      context: (args) => this.gqlContext.build(args),
+      extensions: [(): any => ExtensionInjectCorrelationIdToError],
+      context: (args: any) => this.gqlContext.build(args),
       // all resolvers are registered in the resolver builder, it will return the typical resolver
       // structure which it works out via decorators
       resolvers: this.app.get(ResolverRegistry).register(
-          ...Container.getMany<ResolverInterface>(ResolverToken),
+        ...Container.getMany<ResolverInterface>(ResolverToken),
       ).scalars({
         JSON: GraphQLJSON,
         Date: GraphQLDate,
@@ -114,7 +113,7 @@ export class GraphQLBuilder {
         return error.render();
       },
       tracing: true,
-      formatResponse: (response) => {
+      formatResponse: (response: any) => {
         if (this.gqlMetrics) {
           this.gqlMetrics.onResponse(response);
         }
@@ -124,7 +123,7 @@ export class GraphQLBuilder {
     }, customConfig || {});
   }
 
-  server(customConfig?: Config) {
+  server(customConfig?: Config): ApolloServer {
     const config = this.serverConfig(customConfig);
     const apollo = new ApolloServer(config);
 
@@ -132,7 +131,7 @@ export class GraphQLBuilder {
 
     if (this.subOpts) {
       apollo.installSubscriptionHandlers(
-          this.app.server
+        this.app.server,
       );
     }
 

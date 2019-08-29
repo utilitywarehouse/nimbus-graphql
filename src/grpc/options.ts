@@ -6,13 +6,13 @@ interface CallOptions {
 }
 
 export function options(opt: CallOptions): Partial<grpc.CallOptions> {
-    const opts = {
-        ...opt,
-    };
+  const opts = {
+    ...opt,
+  };
 
-    if (opt.timeout) {
-        opts.deadline = new Date().setSeconds(new Date().getSeconds() + (opt.timeout / 1000));
-    }
+  if (opt.timeout) {
+    opts.deadline = new Date().setSeconds(new Date().getSeconds() + (opt.timeout / 1000));
+  }
 
-    return opts;
+  return opts;
 }

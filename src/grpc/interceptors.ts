@@ -8,7 +8,7 @@ export enum InterceptorType {
     BidiStreaming,
 }
 
-export type InterceptorFactory = (options, nextCall) => grpc.InterceptingCall;
+export type InterceptorFactory = (options: any, nextCall: Function) => grpc.InterceptingCall;
 
 export type InterceptorFactorySelector = (methodDefinition: grpc.MethodDefinition<any, any>) => InterceptorFactory;
 
@@ -18,152 +18,152 @@ export interface Interceptor {
 }
 
 export function interceptorChain(interceptors: Interceptor[]): InterceptorFactorySelector[] {
-    return interceptors.map(i => {
-        return (methodDefinition: grpc.MethodDefinition<any, any>): InterceptorFactory => {
-            switch (i.type) {
-                case InterceptorType.Unary:
-                    if (!methodDefinition.requestStream && !methodDefinition.responseStream) {
-                        return i.interceptorFn;
-                    }
-                    break;
-                case InterceptorType.ClientStreaming:
-                    if (methodDefinition.requestStream && !methodDefinition.responseStream) {
-                        return i.interceptorFn;
-                    }
-                    break;
-                case InterceptorType.ServerStreaming:
-                    if (!methodDefinition.requestStream && methodDefinition.responseStream) {
-                        return i.interceptorFn;
-                    }
-                    break;
-                case InterceptorType.BidiStreaming:
-                    if (methodDefinition.requestStream && methodDefinition.responseStream) {
-                        return i.interceptorFn;
-                    }
-                    break;
-            }
-            return;
-        };
-    });
+  return interceptors.map(i => {
+    return (methodDefinition: grpc.MethodDefinition<any, any>): InterceptorFactory => {
+      switch (i.type) {
+      case InterceptorType.Unary:
+        if (!methodDefinition.requestStream && !methodDefinition.responseStream) {
+          return i.interceptorFn;
+        }
+        break;
+      case InterceptorType.ClientStreaming:
+        if (methodDefinition.requestStream && !methodDefinition.responseStream) {
+          return i.interceptorFn;
+        }
+        break;
+      case InterceptorType.ServerStreaming:
+        if (!methodDefinition.requestStream && methodDefinition.responseStream) {
+          return i.interceptorFn;
+        }
+        break;
+      case InterceptorType.BidiStreaming:
+        if (methodDefinition.requestStream && methodDefinition.responseStream) {
+          return i.interceptorFn;
+        }
+        break;
+      }
+      return;
+    };
+  });
 }
 
 const grpcHistogram = new prom.Histogram({
-    name: 'grpc_requests_seconds',
-    help: 'measures grpc request duration',
-    labelNames: ['status', 'service', 'method'],
-    buckets: [0.2, 0.5, 1, 1.5, 3, 5, 10],
+  name: 'grpc_requests_seconds',
+  help: 'measures grpc request duration',
+  labelNames: ['status', 'service', 'method'],
+  buckets: [0.2, 0.5, 1, 1.5, 3, 5, 10],
 });
 
-const statusMap = {};
+const statusMap: any = {};
 
-Object.keys(grpc.status).forEach(key => {
-    statusMap[grpc.status[key]] = key;
+Object.keys(grpc.status).forEach((key: keyof typeof grpc.status) => {
+  statusMap[grpc.status[key]] = key;
 });
 
-export function prometheusInterceptor(options, nextCall): grpc.InterceptingCall {
-    return new grpc.InterceptingCall(nextCall(options), {
-        start(metadata, listener, next) {
+export const prometheusInterceptor: InterceptorFactory = (options, nextCall) => {
+  return new grpc.InterceptingCall(nextCall(options), {
+    start(metadata, listener, next): void {
 
-            const [service, method] = options.method_definition.path.split('/').splice(1, 2);
+      const [service, method] = options.method_definition.path.split('/').splice(1, 2);
 
-            const labels = {
-                status: statusMap[grpc.status.UNKNOWN],
-                service,
-                method,
-            };
+      const labels = {
+        status: statusMap[grpc.status.UNKNOWN],
+        service,
+        method,
+      };
 
-            const timeRequest = grpcHistogram.startTimer(labels);
+      const timeRequest = grpcHistogram.startTimer(labels);
 
-            const newListener = {
-                onReceiveStatus(status, nextStatus) {
-                    labels.status = statusMap[status.code];
-                    timeRequest();
-                    nextStatus(status);
-                },
-            };
-            next(metadata, newListener);
+      const newListener = {
+        onReceiveStatus(status: grpc.StatusObject, nextStatus: Function): void {
+          labels.status = statusMap[status.code];
+          timeRequest();
+          nextStatus(status);
         },
-    });
-}
+      };
+      next(metadata, newListener);
+    },
+  });
+};
 
 export function retryInterceptorFactory(
-    maxRetries = 1,
-    codeMap: grpc.status[] = [grpc.status.UNAVAILABLE, grpc.status.UNKNOWN],
-): (options, nextCall) => grpc.InterceptingCall {
-    return (options, mainChainNext) => {
+  maxRetries = 1,
+  codeMap: grpc.status[] = [grpc.status.UNAVAILABLE, grpc.status.UNKNOWN],
+): InterceptorFactory {
+  return (options, mainChainNext): grpc.InterceptingCall => {
 
-        let originMetadata;
-        let originMessage;
-        let lastReceivedMessage;
-        let receivedMessageCallback;
-        let lastReceivedStatus;
+    let originMetadata: grpc.Metadata;
+    let originMessage: any;
+    let lastReceivedMessage: any;
+    let receivedMessageCallback: Function;
+    let lastReceivedStatus: grpc.StatusObject;
 
-        return new grpc.InterceptingCall(mainChainNext(options), {
-            sendMessage(message, next) {
-                originMessage = message;
-                next(message);
-            },
-            start(metadata, listener, next) {
+    return new grpc.InterceptingCall(mainChainNext(options), {
+      sendMessage(message, next) {
+        originMessage = message;
+        next(message);
+      },
+      start(metadata, listener, next) {
 
-                originMetadata = metadata;
+        originMetadata = metadata;
 
-                const newListener = {
-                    onReceiveMessage(message, onReceiveNext) {
-                        lastReceivedMessage = message;
-                        receivedMessageCallback = onReceiveNext;
-                    },
-                    onReceiveStatus(status, statusChainNext) {
+        const newListener: grpc.Listener = {
+          onReceiveMessage(message, onReceiveNext) {
+            lastReceivedMessage = message;
+            receivedMessageCallback = onReceiveNext;
+          },
+          onReceiveStatus(status, statusChainNext) {
 
-                        let currentRetries = 0;
+            let currentRetries = 0;
 
-                        function retry() {
+            function retry(): void {
 
-                            if (currentRetries >= maxRetries) {
-                                receivedMessageCallback(lastReceivedMessage);
-                                statusChainNext(lastReceivedStatus);
-                                return; // no more retries allowed
-                            }
+              if (currentRetries >= maxRetries) {
+                receivedMessageCallback(lastReceivedMessage);
+                statusChainNext(lastReceivedStatus);
+                return; // no more retries allowed
+              }
 
-                            currentRetries++;
+              currentRetries++;
 
-                            // trigger the interceptor chain manually for retry
+              // trigger the interceptor chain manually for retry
 
-                            const retryCall = mainChainNext(options);
+              const retryCall = mainChainNext(options);
 
-                            retryCall.start(originMetadata, {
-                                onReceiveMessage(message) {
-                                    lastReceivedMessage = message;
-                                },
-                                onReceiveStatus(retryStatus) {
+              retryCall.start(originMetadata, {
+                onReceiveMessage(message: any) {
+                  lastReceivedMessage = message;
+                },
+                onReceiveStatus(retryStatus: grpc.StatusObject) {
 
-                                    lastReceivedStatus = retryStatus;
-                                    if (codeMap.includes(retryStatus.code)) {
-                                        retry();
-                                    } else {
-                                        receivedMessageCallback(lastReceivedMessage);
-                                        statusChainNext(lastReceivedStatus);
-                                    }
-                                },
-                            });
+                  lastReceivedStatus = retryStatus;
+                  if (codeMap.includes(retryStatus.code)) {
+                    retry();
+                  } else {
+                    receivedMessageCallback(lastReceivedMessage);
+                    statusChainNext(lastReceivedStatus);
+                  }
+                },
+              });
 
-                            retryCall.sendMessage(originMessage);
-                            retryCall.halfClose();
-                        }
+              retryCall.sendMessage(originMessage);
+              retryCall.halfClose();
+            }
 
-                        lastReceivedStatus = status;
+            lastReceivedStatus = status;
 
-                        if (codeMap.includes(status.code)) {
-                            retry();
-                        } else {
-                            // no need to retry, just return what was originally cached
-                            receivedMessageCallback(lastReceivedMessage);
-                            statusChainNext(lastReceivedStatus);
-                        }
-                    },
-                };
+            if (codeMap.includes(status.code)) {
+              retry();
+            } else {
+              // no need to retry, just return what was originally cached
+              receivedMessageCallback(lastReceivedMessage);
+              statusChainNext(lastReceivedStatus);
+            }
+          },
+        };
 
-                next(metadata, newListener);
-            },
-        });
-    };
+        next(metadata, newListener);
+      },
+    } as grpc.Requester);
+  };
 }

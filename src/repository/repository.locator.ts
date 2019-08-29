@@ -7,7 +7,7 @@ export class RepositoryLocator {
 
   constructor(private readonly container: ContainerInstance) {}
 
-  private repositories: AbstractRepository[]  = []
+  private repositories: AbstractRepository[]  = [];
 
   getWithContext<T>(repoKey: typeof AbstractRepository | AbstractRepository, context: T): AbstractRepository {
 
@@ -18,14 +18,14 @@ export class RepositoryLocator {
       const repo = this.container.get<AbstractRepository>(interfaceType.constructor);
 
       if (interfaceType.constructor === repoKey.constructor || repo.constructor === repoKey.constructor) {
-        const cached = this.repositories.find((cachedRepo) => cachedRepo.constructor === repo.constructor)
+        const cached = this.repositories.find((cachedRepo) => cachedRepo.constructor === repo.constructor);
         if (cached) {
           return cached;
         }
 
-        const newRepoWithContext = repo.withContext(context)
-        this.repositories.push(newRepoWithContext)
-        return newRepoWithContext
+        const newRepoWithContext = repo.withContext(context);
+        this.repositories.push(newRepoWithContext);
+        return newRepoWithContext;
       }
     }
 

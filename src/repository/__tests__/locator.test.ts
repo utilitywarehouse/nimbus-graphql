@@ -1,20 +1,21 @@
+// tslint:disable:max-classes-per-file
 import { RepositoryLocator } from '../repository.locator';
 import { AbstractRepository } from '../abstract.repository';
-import { RepositoryContext } from '../repository.context';
 import { RepositoryFactory } from '../repository.decorators';
-import { Container } from "typedi";
+import { Container } from 'typedi';
 
 abstract class AbstractRepo extends AbstractRepository {}
 
 @RepositoryFactory(() => {
+  // eslint-disable-next-line
   return new ConcreteRepo();
 }, AbstractRepo)
 class ConcreteRepo extends AbstractRepository {
-  checkHealth(cr: any) {
+  checkHealth(): boolean {
     return true;
   }
 
-  withContext(context: RepositoryContext): AbstractRepository {
+  withContext(): AbstractRepository {
     return this;
   }
 }

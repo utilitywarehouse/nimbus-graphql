@@ -5,22 +5,22 @@ interface Parameters {
 }
 
 export class URL {
-    private constructor(private readonly template: string, private readonly parsed: string) {
+  private constructor(private readonly template: string, private readonly parsed: string) {
 
-    }
+  }
 
-    static template(template: string, parameters?: Parameters): URL {
+  static template(template: string, parameters?: Parameters): URL {
 
-        const tpl = templates.parse(template);
+    const tpl = templates.parse(template);
 
-        return new URL(template, tpl.expand(parameters));
-    }
+    return new URL(template, tpl.expand(parameters));
+  }
 
-    urlTemplate() {
-        return this.template;
-    }
+  urlTemplate(): string {
+    return this.template;
+  }
 
-    toString() {
-        return this.parsed;
-    }
+  toString(): string {
+    return this.parsed;
+  }
 }

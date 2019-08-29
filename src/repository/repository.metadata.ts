@@ -5,37 +5,37 @@ export class RepositoryMetadata {
 
     public type: any;
 
-    setType(type: any) {
-        this.type = RepositoryMetadata.getType(type);
+    setType(type: any): void {
+      this.type = RepositoryMetadata.getType(type);
     }
 
-    static getType(target: any) {
+    static getType(target: any): any {
 
-        let returnType = target;
+      let returnType = target;
 
-        if (typeof target === 'function') {
-            // probably constructor
-            returnType = target.prototype;
-        } else {
-            // probably an instance
-            returnType = target;
-        }
+      if (typeof target === 'function') {
+        // probably constructor
+        returnType = target.prototype;
+      } else {
+        // probably an instance
+        returnType = target;
+      }
 
-        return returnType;
+      return returnType;
     }
 
     static for(target: any): RepositoryMetadata {
 
-        let meta = Reflect.getMetadata(RepositoryMetadataKey, RepositoryMetadata.getType(target));
+      let meta = Reflect.getMetadata(RepositoryMetadataKey, RepositoryMetadata.getType(target));
 
-        if (meta) {
-            return meta;
-        }
-
-        meta = new RepositoryMetadata();
-
-        Reflect.defineMetadata(RepositoryMetadataKey, meta, RepositoryMetadata.getType(target));
-
+      if (meta) {
         return meta;
+      }
+
+      meta = new RepositoryMetadata();
+
+      Reflect.defineMetadata(RepositoryMetadataKey, meta, RepositoryMetadata.getType(target));
+
+      return meta;
     }
 }
