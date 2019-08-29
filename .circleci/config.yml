@@ -1,0 +1,63 @@
+version: 2
+
+jobs:
+    install:
+        working_directory: ~/build
+        docker:
+            - image: circleci/node
+        steps:
+            - checkout
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn install --ignore-scripts
+            - save_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+                  paths:
+                      - ~/.cache/yarn
+
+    build:
+        working_directory: ~/build
+        docker:
+            - image: circleci/node
+        steps:
+            - checkout
+            - run: yarn build
+
+    lint:
+        working_directory: ~/build
+        docker:
+            - image: circleci/node
+        steps:
+            - checkout
+            - run: yarn lint
+
+
+    test:
+        working_directory: ~/build
+        docker:
+            - image: circleci/node
+        steps:
+            - checkout
+            - run:
+                command: yarn test:ci
+                environment:
+                    JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+            - store_test_results:
+                path: ./reports/junit
+            - store_artifacts:
+                path: ./reports/junit
+
+workflows:
+    version: 2
+    development:
+        jobs:
+            - install
+            - build:
+                  requires:
+                      - install
+            - lint:
+                  requires:
+                      - install
+            - test:
+                  requires:
+                      - install

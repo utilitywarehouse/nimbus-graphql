@@ -14,6 +14,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:ci": "jest --coverage --ci --maxWorkers=2 --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "prepublish": "node ./scripts/prepublish.js",
     "postpublish": "node ./scripts/postpublish.js"
