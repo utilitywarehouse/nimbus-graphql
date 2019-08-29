@@ -19,14 +19,12 @@ jobs:
                   paths:
                       - ~/.cache/yarn
             - persist_to_workspace:
-                  root: /tmp
-                  paths:
-                      - build/*
+                  root: /tmp/build
+                  paths: .
 
     build:
         executor: nimbus-executor
         steps:
-            - checkout
             - attach_workspace:
                   at: /tmp/build
             - run: yarn build
@@ -34,7 +32,6 @@ jobs:
     lint:
         executor: nimbus-executor
         steps:
-            - checkout
             - attach_workspace:
                   at: /tmp/build
             - run: yarn lint
@@ -43,7 +40,6 @@ jobs:
     test:
         executor: nimbus-executor
         steps:
-            - checkout
             - attach_workspace:
                   at: /tmp/build
             - run:
