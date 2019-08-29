@@ -1,8 +1,9 @@
-import {Repository, RepositoryFactory} from '../repository.decorators';
-import {RepositoryMetadata} from '../repository.metadata';
+import { Repository, RepositoryFactory } from '../repository.decorators';
+import { RepositoryMetadata } from '../repository.metadata';
 
-const factory = () => 'factored';
+const factory = (): string => 'factored';
 
+// eslint-disable-next-line
 @Repository(Repo)
 class Repo {
 
@@ -13,6 +14,7 @@ class RepoTypeDerived {
 
 }
 
+// eslint-disable-next-line
 @RepositoryFactory(factory, RepoWithFactory)
 class RepoWithFactory {
 
@@ -24,8 +26,8 @@ class RepoDerivedWithFactory {
 }
 
 test('decorators', () => {
-    expect(RepositoryMetadata.for(new Repo()).type).toBe(Repo.prototype);
-    expect(RepositoryMetadata.for(new RepoTypeDerived()).type).toBe(RepoTypeDerived.prototype);
-    expect(RepositoryMetadata.for(new RepoWithFactory()).type).toBe(RepoWithFactory.prototype);
-    expect(RepositoryMetadata.for(new RepoDerivedWithFactory()).type).toBe(RepoDerivedWithFactory.prototype);
+  expect(RepositoryMetadata.for(new Repo()).type).toBe(Repo.prototype);
+  expect(RepositoryMetadata.for(new RepoTypeDerived()).type).toBe(RepoTypeDerived.prototype);
+  expect(RepositoryMetadata.for(new RepoWithFactory()).type).toBe(RepoWithFactory.prototype);
+  expect(RepositoryMetadata.for(new RepoDerivedWithFactory()).type).toBe(RepoDerivedWithFactory.prototype);
 });

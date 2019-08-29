@@ -1,11 +1,11 @@
 import { Container, ContainerInstance } from 'typedi';
-import {createServer as createHttpServer, Server} from 'http';
+import { createServer as createHttpServer, Server } from 'http';
 import Logger = require('bunyan');
 import { Module } from './module';
 import { Config } from '../config';
 import { LoggerFactory, Logger as LoggerToken } from '../logger';
-import { Express } from "express";
-import { createExpressApp } from "./express";
+import { Express } from 'express';
+import { createExpressApp } from './express';
 
 /**
  * Application
@@ -24,7 +24,7 @@ export class Application extends ContainerInstance {
     this.modules = [];
     this.containerId = containerID;
     this.express = createExpressApp();
-    this.server = createHttpServer(this.express)
+    this.server = createHttpServer(this.express);
   }
 
   /**
@@ -33,11 +33,11 @@ export class Application extends ContainerInstance {
    * @param modules
    * @param containerId
    */
-  static async create(basePath: string, modules: Array<new (app: Application) => Module>, containerId?: symbol) {
+  static async create(basePath: string, modules: Array<new (app: Application) => Module>, containerId?: symbol): Promise<Application> {
     const app = new Application(basePath);
 
-    await app.loadConfig();
-    await app.defaultLogger();
+    app.loadConfig();
+    app.defaultLogger();
     await app.initModules(modules);
 
     return app;
@@ -46,15 +46,15 @@ export class Application extends ContainerInstance {
   /**
    * Get config Instance
    */
-  config() {
+  config(): Config {
     return this.get(Config);
   }
 
   /**
    * Get Logger Instance
    */
-  logger() {
-    return this.get(LoggerToken);
+  logger(): typeof LoggerToken {
+    return this.get(LoggerToken) as typeof LoggerToken;
   }
 
   /**
@@ -62,7 +62,7 @@ export class Application extends ContainerInstance {
    * @param handle
    * @param listeningListener
    */
-  listen(handle: any, listeningListener?: Function) {
+  listen(handle: any, listeningListener?: () => void): Server {
     return this.server.listen(handle, listeningListener);
   }
 
@@ -70,7 +70,7 @@ export class Application extends ContainerInstance {
    * Set a custom logger
    * @param logger
    */
-  setLogger(logger: Logger) {
+  setLogger(logger: Logger): void {
     this.set(LoggerToken, logger);
     Container.set(LoggerToken, logger);
   }
@@ -78,7 +78,7 @@ export class Application extends ContainerInstance {
   /**
    * Init all application modules
    */
-  initModules(modules: Array<new (app: Application) => Module>) {
+  initModules(modules: Array<new (app: Application) => Module>): Promise<any> {
     return modules.reduce((promise: Promise<any>, appModule: new (app: Application) => Module) => {
       return promise.then(() => {
         const moduleInstance = new appModule(this);
@@ -91,8 +91,8 @@ export class Application extends ContainerInstance {
   /**
    * Load configurations
    */
-  private async loadConfig() {
-    const config = await Config.load(this.basePath, '!(node_modules)/**/*.config.!(*.d){js,ts,json}');
+  private loadConfig(): Config {
+    const config = Config.load(this.basePath, '!(node_modules)/**/*.config.!(*.d){js,ts,json}');
     Container.set({ type: Config, value: config, global: true });
     return config;
   }
@@ -100,11 +100,11 @@ export class Application extends ContainerInstance {
   /**
    * Default logger
    */
-  private defaultLogger() {
+  private defaultLogger(): void {
     const config = Container.get(Config);
-    return this.setLogger(LoggerFactory.new(
-        config.get('log.name'),
-        config.get('log.level'),
+    this.setLogger(LoggerFactory.new(
+      config.get('log.name'),
+      config.get('log.level'),
     ));
   }
 }

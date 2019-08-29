@@ -1,9 +1,8 @@
 import { Service } from 'typedi';
 import { ResolverInterface } from './resolver.interface';
 import { ResolverMetadata } from './resolver.metadata';
-import * as set from 'lodash.set';
-import * as get from 'lodash.get';
-import { NullError } from "./errors/null.error";
+import { get, set } from 'lodash';
+import { NullError } from './errors';
 
 @Service()
 export class ResolverRegistry {
@@ -16,15 +15,15 @@ export class ResolverRegistry {
     return this;
   }
 
-  method(meta: ResolverMetadata, r, method) {
+  method(meta: ResolverMetadata, r: any, method: string): any {
     return this.withHooks(meta, method, this.remapMethodParameters(meta, r, method));
   }
 
-  remapMethodParameters(meta: ResolverMetadata, r, method) {
+  remapMethodParameters(meta: ResolverMetadata, r: any, method: string): Function {
     if (meta.methodParamOverrides[method]) {
       const argSpec = meta.methodParamOverrides[method];
 
-      return (...args) => {
+      return (...args: any[]): any => {
 
         const mappedArgs = [];
 
@@ -39,14 +38,14 @@ export class ResolverRegistry {
         return r[method](...mappedArgs);
       };
     }
-    return (...args) => r[method](...args);
+    return (...args: any): any => r[method](...args);
   }
 
-  withHooks(meta: ResolverMetadata, method: string, fn: any) {
+  withHooks(meta: ResolverMetadata, method: string, fn: any): Function {
     const beforeHooks = meta.beforeHooks.filter((s) => s.method === method);
     const afterHooks = meta.afterHooks.filter((s) => s.method === method);
 
-    return async (...args) => {
+    return async (...args: any[]): Promise<any> => {
       const promisedBeforeHooks = beforeHooks.map((hookDef: any) => Promise.resolve(hookDef.hook(...args)));
 
       try {
@@ -76,13 +75,13 @@ export class ResolverRegistry {
 
   resolverMap(): {} {
 
-    const usedProps = [];
+    const usedProps: any[] = [];
 
     const resolvers = {};
 
-    this.resolvers.forEach(r => {
+    this.resolvers.forEach((r: any) => {
 
-      const safeSet = (path, fn) => {
+      const safeSet = (path: any, fn: any): void => {
         if (get(resolvers, path)) {
           throw new Error(`${path} resolver already set, attempting to set from ${r.constructor.name}`);
         }
@@ -101,8 +100,8 @@ export class ResolverRegistry {
         usedProps.push(method);
       });
 
-      meta.subscriptions.forEach(({name, method}) => {
-        safeSet(`Subscription.${name}`, {subscribe: this.method(meta, r, method)});
+      meta.subscriptions.forEach(({ name, method }) => {
+        safeSet(`Subscription.${name}`, { subscribe: this.method(meta, r, method) });
         usedProps.push(method);
       });
 
@@ -114,7 +113,7 @@ export class ResolverRegistry {
       const typePrefix = meta.type ? `${meta.type}.` : '';
 
       Object.getOwnPropertyNames(Object.getPrototypeOf(r)).filter(prop => {
-        return typeof r[prop] === 'function' && prop !== 'constructor' && usedProps.indexOf(prop) === -1;
+        return typeof r[prop] === 'function' && prop !== 'constructor' && !usedProps.includes(prop);
       }).forEach(method => {
         safeSet(`${typePrefix}${method}`, this.method(meta, r, method));
       });

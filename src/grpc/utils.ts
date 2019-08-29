@@ -15,18 +15,19 @@ export type PromisedGRPCResponse<T> = Promise<{
  */
 export function promisify<T>(grpcClientCall: (callback: gRPCHandler<T>) => Call): PromisedGRPCResponse<T> {
   function handleGRPC(resolve: (data: T) => void, reject: (error: Error) => void): gRPCHandler<T> {
-    return (error: grpc.ServiceError | null, response: T) => {
+    return (error: grpc.ServiceError | null, response: T): void => {
       if (error) {
-        return reject(TransportError.wrap(error));
+        reject(TransportError.wrap(error));
       }
-      return resolve(response);
+      resolve(response);
     };
   }
 
-  return new Promise(async (enhancedResolve, enhancedReject) => {
+  // eslint-disable-next-line
+  return new Promise(async (enhancedResolve: Function, enhancedReject: Function) => {
     try {
       let call: Call;
-      const response = await new Promise((resolve: (data: T) => void, reject) => {
+      const response = await new Promise((resolve: (data: T) => void, reject): void => {
         call = grpcClientCall(handleGRPC(resolve, reject));
       });
 

@@ -10,7 +10,7 @@ export class RepositoryContext {
   authToken?: AuthToken;
   correlationId?: string;
 
-  static fromGQLContext<T>(context: T & { authToken?: AuthToken, correlationId }): RepositoryContext {
+  static fromGQLContext<T>(context: T & { authToken?: AuthToken; correlationId: string }): RepositoryContext {
     const ctx = new RepositoryContext();
     ctx.authToken = context.authToken;
     ctx.correlationId = context.correlationId;

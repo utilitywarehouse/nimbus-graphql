@@ -1,4 +1,4 @@
-import {Health} from './module';
+import { Health } from './module';
 
 export interface Checker {
     name: string;
@@ -19,21 +19,21 @@ export class CheckerReporter {
     action?: string;
     impact?: string;
 
-    healthy(output: string) {
-        this.output = output;
-        this.health = Health.Healthy;
+    healthy(output: string): void {
+      this.output = output;
+      this.health = Health.Healthy;
     }
 
-    degraded(output: string, action: string) {
-        this.output = output;
-        this.action = action;
-        this.health = Health.Degraded;
+    degraded(output: string, action: string): void {
+      this.output = output;
+      this.action = action;
+      this.health = Health.Degraded;
     }
 
-    unhealthy(output: string, action: string, impact: string) {
-        this.output = output;
-        this.action = action;
-        this.impact = impact;
-        this.health = Health.Unhealthy;
+    unhealthy(output: string, action: string, impact: string): void {
+      this.output = output;
+      this.action = action;
+      this.impact = impact;
+      this.health = Health.Unhealthy;
     }
 }

@@ -1,22 +1,22 @@
 import { After, Arg, Before, Context, Mutation, Parent, Query, Resolve, Resolver } from '../resolver.decorators';
 import { ResolverRegistry } from '../resolver.registry';
 import { makeExecutableSchema } from 'graphql-tools';
-import { graphql } from 'graphql';
+import { graphql, GraphQLSchema } from 'graphql';
 import * as assert from 'assert';
 import { NullError } from '../errors';
 
 @Resolver('Decorator')
 class ResolverClass {
 
-  id(parent) {
+  id(parent: any): string {
     return parent.id + '-1';
   }
 
   @Before(() => {
-      throw new NullError('tried to access protected field');
+    throw new NullError('tried to access protected field');
   })
   @Query()
-  itsAlwaysNull() {
+  itsAlwaysNull(): string {
     return 'you\'ll never see this message';
   }
 
@@ -24,7 +24,7 @@ class ResolverClass {
     throw new Error('You hit before hook');
   })
   @Query()
-  beforeHook() {
+  beforeHook(): string {
     return 'You\'ll never hit this';
   }
 
@@ -32,40 +32,40 @@ class ResolverClass {
     throw new Error('You hit after hook');
   })
   @Query()
-  afterHook() {
+  afterHook(): string {
     return 'you\'ll never see this message';
   }
 
   @Resolve('OtherType.id')
-  field2(parent) {
+  field2(parent: any): string {
     return parent.id + '-1';
   }
 
   @Query()
-  decorator() {
+  decorator(): any {
     return { id: 'id-field' };
   }
 
   @Query('otherQuery')
-  other() {
+  other(): any {
     return { id: 'id-other' };
   }
 
   @Mutation()
-  mutation() {
+  mutation(): string {
     return 'mutated';
   }
 
   @Mutation('otherMutation')
-  mutation2() {
+  mutation2(): string {
     return 'otherMutation';
   }
 
   methodWithMappedParams(
-      @Parent parent,
-      @Context('ctx') context,
-      @Arg('arg') arg,
-  ) {
+      @Parent parent: any,
+      @Context('ctx') context: any,
+      @Arg('arg') arg: any,
+  ): string {
 
     assert(parent, 'Parent not present');
     assert(context, 'Context not present');
@@ -77,7 +77,7 @@ class ResolverClass {
 
 describe.only('GraphQL Decorators', () => {
 
-  let schema;
+  let schema: GraphQLSchema;
   beforeEach(() => {
     const schemaSDL = `
       type Decorator {

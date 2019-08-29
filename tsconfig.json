@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "removeComments": true,
     "noLib": false,
     "allowSyntheticDefaultImports": true,
@@ -10,11 +10,22 @@
     "experimentalDecorators": true,
     "target": "es6",
     "sourceMap": true,
-    "lib": ["es6", "es7", "esnext.asynciterable", "dom"],
+    "lib": [
+      "es6",
+      "es7",
+      "esnext.asynciterable",
+      "dom"
+    ],
     "outDir": "./dist",
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "moduleResolution": "node",
-    "types": ["graphql"]
+    "types": [
+      "node",
+      "graphql",
+      "jest"
+    ]
   },
-  "exclude": ["node_modules", "**/__tests__/**/*.ts"]
+  "exclude": [
+    "node_modules"
+  ]
 }

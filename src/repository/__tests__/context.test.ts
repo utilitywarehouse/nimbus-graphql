@@ -7,23 +7,30 @@ test('building from GQL context', () => {
   const req = reqOnj as Request;
 
   const authToken: AuthToken = {
-    asScopes(scopes: string[]): boolean {
+    asHeader(): string {
+      return '';
+    },
+    payload<T>(): T {
+      return undefined;
+    },
+    asScopes(): boolean {
       return true;
     },
     isValid(): boolean {
       return false;
     },
     asString(): string {
-      return "";
+      return '';
     }
-  }
+  };
 
   const gqlContext = {
     authToken,
     req,
+    correlationId: 'id',
   };
 
-  const repoContext = RepositoryContext.fromGQLContext(gqlContext);
+  const repoContext = RepositoryContext.fromGQLContext(gqlContext as any);
 
   expect(repoContext.authToken).toBe(authToken);
   expect(repoContext.correlationId).toBe('id');
