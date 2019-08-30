@@ -1,10 +1,6 @@
-import { Request } from 'express';
 import { AuthToken, RepositoryContext } from '../';
 
 test('building from GQL context', () => {
-
-  const reqOnj: any = { header: jest.fn(() => 'id') };
-  const req = reqOnj as Request;
 
   const authToken: AuthToken = {
     asHeader(): string {
@@ -26,14 +22,11 @@ test('building from GQL context', () => {
 
   const gqlContext = {
     authToken,
-    req,
     correlationId: 'id',
   };
 
-  const repoContext = RepositoryContext.fromGQLContext(gqlContext as any);
+  const repoContext = RepositoryContext.fromGQLContext(gqlContext);
 
   expect(repoContext.authToken).toBe(authToken);
   expect(repoContext.correlationId).toBe('id');
-  // TODO: check why isn't called
-  // expect(reqOnj.header).toHaveBeenCalledWith('x-correlation-id');
 });

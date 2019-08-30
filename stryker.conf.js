@@ -4,7 +4,6 @@ module.exports = function(config) {
     packageManager: 'yarn',
     reporters: ['html', 'clear-text', 'progress', 'dashboard'],
     testRunner: 'jest',
-    // transpilers: ["typescript"],
     coverageAnalysis: 'off',
     tsconfigFile: 'tsconfig.json',
     mutate: [

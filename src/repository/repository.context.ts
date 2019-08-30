@@ -6,11 +6,13 @@ export interface AuthToken {
   payload<T>(): T;
 }
 
-export class RepositoryContext {
+abstract class RepositoryContextBase {
   authToken?: AuthToken;
   correlationId?: string;
+}
 
-  static fromGQLContext<T>(context: T & { authToken?: AuthToken; correlationId: string }): RepositoryContext {
+export class RepositoryContext extends RepositoryContextBase{
+  static fromGQLContext(context: Required<RepositoryContextBase>): RepositoryContext {
     const ctx = new RepositoryContext();
     ctx.authToken = context.authToken;
     ctx.correlationId = context.correlationId;
