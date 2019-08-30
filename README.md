@@ -7,7 +7,7 @@ A GraphQL Framework with batteries included
 
 ## VSCode users
 
-Since `tslint` is being deprecated, we are using `eslint` to make this VSCode extension report issues on typescript files we need to add a setting.
+Since `tslint` is being deprecated, we are using `eslint`. To make the `eslint` VSCode extension report issues on typescript files we need to add a setting.
 To do that, add the following snippet on `settings.json`:
 ```json
 {
