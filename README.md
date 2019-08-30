@@ -1,6 +1,8 @@
 # nimbus-graphql
 A GraphQL Framework with batteries included
 
+[![CircleCI](https://circleci.com/gh/utilitywarehouse/nimbus-graphql/tree/master.svg?style=svg)](https://circleci.com/gh/utilitywarehouse/nimbus-graphql/tree/master)
+
 # Developing
 
 ## VSCode users
