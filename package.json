@@ -14,7 +14,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:ci": "jest --coverage --ci --maxWorkers=2 --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:mutation": "stryker run",
     "prepublish": "node ./scripts/prepublish.js",
     "postpublish": "node ./scripts/postpublish.js"
   },
@@ -45,6 +47,10 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^2.0.2",
+    "@stryker-mutator/html-reporter": "^2.0.2",
+    "@stryker-mutator/jest-runner": "^2.0.2",
+    "@stryker-mutator/typescript": "^2.0.2",
     "@types/bunyan": "^1.8.5",
     "@types/google-protobuf": "^3.2.7",
     "@types/graphql": "^14.0.3",
@@ -64,6 +70,7 @@
     "grpc-tools": "^1.8.0",
     "grpc_tools_node_protoc_ts": "^2.4.2",
     "jest": "^23.6.0",
+    "jest-junit": "^8.0.0",
     "mockttp": "^0.12.4",
     "supertest": "^3.4.2",
     "ts-jest": "^23.10.5",

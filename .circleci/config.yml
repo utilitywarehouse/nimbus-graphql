@@ -1,0 +1,67 @@
+version: 2.1
+
+executors:
+    nimbus-executor:
+        docker:
+            - image: circleci/node
+        working_directory: /tmp/build
+
+jobs:
+    install:
+        executor: nimbus-executor
+        steps:
+            - checkout
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn install --ignore-scripts
+            - save_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+                  paths:
+                      - ~/.cache/yarn
+            - persist_to_workspace:
+                  root: /tmp/build
+                  paths: .
+
+    build:
+        executor: nimbus-executor
+        steps:
+            - attach_workspace:
+                  at: /tmp/build
+            - run: yarn build
+
+    lint:
+        executor: nimbus-executor
+        steps:
+            - attach_workspace:
+                  at: /tmp/build
+            - run: yarn lint
+
+
+    test:
+        executor: nimbus-executor
+        steps:
+            - attach_workspace:
+                  at: /tmp/build
+            - run:
+                command: yarn test:ci
+                environment:
+                    JEST_JUNIT_OUTPUT_DIR: "reports/junit/js-test-results.xml"
+            - store_test_results:
+                path: ./reports/junit
+            - store_artifacts:
+                path: ./reports/junit
+
+workflows:
+    version: 2
+    development:
+        jobs:
+            - install
+            - build:
+                  requires:
+                      - install
+            - lint:
+                  requires:
+                      - install
+            - test:
+                  requires:
+                      - install
