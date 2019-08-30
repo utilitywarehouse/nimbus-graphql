@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse }
 import * as prom from 'prom-client';
 import { URL } from './http.url';
 import { TransportError } from '../errors';
+import getErrorFromStatusCode from './http.errors';
 
 const httpHistogram = new prom.Histogram({
   name: 'http_client_requests_seconds',
@@ -18,9 +19,7 @@ enum Method {
     PUT = 'put',
 }
 
-interface Data {
-    [k: string]: any;
-}
+type Data = Record<string, any>;
 
 class Client {
   constructor(private readonly transport: AxiosInstance) {
@@ -34,7 +33,7 @@ class Client {
     }
   }
 
-  private execute<T>(method: Method, url: URL | string, data?: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
+  private async execute<T>(method: Method, url: URL | string, data?: Data, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     if (!options) {
       options = {};
     }
@@ -52,15 +51,23 @@ class Client {
 
     const timeRequest = httpHistogram.startTimer(labels);
 
-    // add catch for instrumentation
-    return this.transport.request<T>(options).then((response: AxiosResponse<T>) => {
-      labels.status = response.status;
-      timeRequest();
-      return response;
-    }).catch((error) => {
+    let response: AxiosResponse<T>;
+
+    try {
+      response = await this.transport.request<T>(options);
+    } catch (error) {
       timeRequest();
       throw new TransportError(error.message);
-    });
+    }
+
+    labels.status = response.status;
+    timeRequest();
+
+    if (response.status >= 400) {
+      throw new (getErrorFromStatusCode(response.status) as any);
+    }
+
+    return response;
   }
 
   get<T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig): AxiosPromise<T> {
@@ -84,14 +91,11 @@ class Client {
   }
 }
 
-export const createClient = (options?: AxiosRequestConfig): Client => {
-  if (!options) {
-    options = {};
-  }
-
-  if (!options.timeout) {
-    options.timeout = 3000;
-  }
+export const createClient = (options: AxiosRequestConfig = {}): Client => {
+  options = {
+    ...options,
+    timeout: options.timeout || 3000,
+  };
 
   return new Client(axios.create(options));
 };

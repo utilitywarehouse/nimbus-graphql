@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { createClient } from '../http.client';
-import { TransportError } from '../../errors';
+import { URL } from '../http.url';
+import { BadRequestError, ForbiddenError, InternalServerError, NotFoundError, TransportError, UnauthorizedError } from '../../errors';
 
 const mockRequest = jest.fn();
 mockRequest.mockResolvedValue('return');
@@ -28,6 +29,27 @@ describe('http client', () => {
     });
     // eslint-disable-next-line
     expect(mockAxios.create).toHaveBeenCalledWith({ timeout: 10, method: 'post' });
+  });
+
+  test('execute without options parameter', async () => {
+    const client = createClient();
+
+    await client.get('/url');
+
+    expect(mockRequest).toHaveBeenCalled();
+  });
+
+  test('treat URL', async () => {
+    const client = createClient();
+
+    await client.get(URL.template('/url/{id}', { id: '10' }));
+
+    expect(mockRequest).toHaveBeenCalledWith({
+      url: '/url/10',
+      method: 'get',
+      data: undefined,
+      validateStatus: null,
+    });
   });
 
   test('get', async () => {
@@ -100,12 +122,61 @@ describe('http client', () => {
     });
   });
 
-  test('throws transport error on failed request', () => {
+  test('throws transport error on failed request', async () => {
     mockRequest.mockRejectedValue(new Error('err msg'));
 
     const client = createClient();
 
-    expect(client.delete('/url', { timeout: 10 })).rejects.toThrow(TransportError);
+    await expect(client.delete('/url', { timeout: 10 })).rejects.toThrow(TransportError);
+  });
 
+  test('throws bad request error on response status code = 400', async () => {
+    mockRequest.mockReturnValue({
+      status: 400,
+    });
+
+    const client = createClient();
+
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(BadRequestError);
+  });
+
+  test('throws unauthorized error on response status code = 401', async () => {
+    mockRequest.mockReturnValue({
+      status: 401,
+    });
+
+    const client = createClient();
+
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(UnauthorizedError);
+  });
+
+  test('throws forbidden error on response status code = 403', async () => {
+    mockRequest.mockReturnValue({
+      status: 403,
+    });
+
+    const client = createClient();
+
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(ForbiddenError);
+  });
+
+  test('throws not found error on response status code = 404', async () => {
+    mockRequest.mockReturnValue({
+      status: 404,
+    });
+
+    const client = createClient();
+
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(NotFoundError);
+  });
+
+  test('throws internal server error on response status code = 500', async () => {
+    mockRequest.mockReturnValue({
+      status: 500,
+    });
+
+    const client = createClient();
+
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(InternalServerError);
   });
 });
