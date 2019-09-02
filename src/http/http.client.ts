@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as prom from 'prom-client';
 import { URL } from './http.url';
 import { TransportError } from '../errors';
@@ -25,7 +25,7 @@ class Client {
   constructor(private readonly transport: AxiosInstance) {
   }
 
-  private endpoint(url: URL | string): string {
+  private static endpoint(url: URL | string): string {
     if (url instanceof URL) {
       return url.toString();
     } else {
@@ -45,7 +45,7 @@ class Client {
     };
 
     options.method = method;
-    options.url = this.endpoint(url);
+    options.url = Client.endpoint(url);
     options.data = data;
     options.validateStatus = null;
 
@@ -64,31 +64,26 @@ class Client {
     timeRequest();
 
     if (response.status >= 400) {
-      throw new (getErrorFromStatusCode(response.status) as any);
+      throw new (getErrorFromStatusCode(response.status));
     }
 
     return response;
   }
 
-  get<T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.GET, url, undefined, options);
-  }
+  get = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+    this.execute(Method.GET, url, undefined, options);
 
-  delete<T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.DELETE, url, undefined, options);
-  }
+  delete = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+    this.execute(Method.DELETE, url, undefined, options);
 
-  post<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.POST, url, data, options);
-  }
+  post = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.POST, url, data, options);
 
-  put<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.PUT, url, data, options);
-  }
+  put = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.PUT, url, data, options);
 
-  patch<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.PATCH, url, data, options);
-  }
+  patch = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.PATCH, url, data, options);
 }
 
 export const createClient = (options: AxiosRequestConfig = {}): Client => {
