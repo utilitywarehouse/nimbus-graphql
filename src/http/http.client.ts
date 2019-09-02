@@ -1,7 +1,8 @@
-import axios, { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as prom from 'prom-client';
 import { URL } from './http.url';
 import { TransportError } from '../errors';
+import getErrorFromStatusCode from './http.errors';
 
 const httpHistogram = new prom.Histogram({
   name: 'http_client_requests_seconds',
@@ -18,15 +19,13 @@ enum Method {
     PUT = 'put',
 }
 
-interface Data {
-    [k: string]: any;
-}
+type Data = Record<string, any>;
 
 class Client {
   constructor(private readonly transport: AxiosInstance) {
   }
 
-  private endpoint(url: URL | string): string {
+  private static endpoint(url: URL | string): string {
     if (url instanceof URL) {
       return url.toString();
     } else {
@@ -34,7 +33,7 @@ class Client {
     }
   }
 
-  private execute<T>(method: Method, url: URL | string, data?: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
+  private async execute<T>(method: Method, url: URL | string, data?: Data, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     if (!options) {
       options = {};
     }
@@ -46,52 +45,52 @@ class Client {
     };
 
     options.method = method;
-    options.url = this.endpoint(url);
+    options.url = Client.endpoint(url);
     options.data = data;
     options.validateStatus = null;
 
     const timeRequest = httpHistogram.startTimer(labels);
 
-    // add catch for instrumentation
-    return this.transport.request<T>(options).then((response: AxiosResponse<T>) => {
-      labels.status = response.status;
-      timeRequest();
-      return response;
-    }).catch((error) => {
+    let response: AxiosResponse<T>;
+
+    try {
+      response = await this.transport.request<T>(options);
+    } catch (error) {
       timeRequest();
       throw new TransportError(error.message);
-    });
+    }
+
+    labels.status = response.status;
+    timeRequest();
+
+    if (response.status >= 400) {
+      throw new (getErrorFromStatusCode(response.status));
+    }
+
+    return response;
   }
 
-  get<T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.GET, url, undefined, options);
-  }
+  get = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+    this.execute(Method.GET, url, undefined, options);
 
-  delete<T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.DELETE, url, undefined, options);
-  }
+  delete = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+    this.execute(Method.DELETE, url, undefined, options);
 
-  post<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.POST, url, data, options);
-  }
+  post = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.POST, url, data, options);
 
-  put<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.PUT, url, data, options);
-  }
+  put = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.PUT, url, data, options);
 
-  patch<T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.execute(Method.PATCH, url, data, options);
-  }
+  patch = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+    this.execute(Method.PATCH, url, data, options);
 }
 
-export const createClient = (options?: AxiosRequestConfig): Client => {
-  if (!options) {
-    options = {};
-  }
-
-  if (!options.timeout) {
-    options.timeout = 3000;
-  }
+export const createClient = (options: AxiosRequestConfig = {}): Client => {
+  options = {
+    ...options,
+    timeout: options.timeout || 3000,
+  };
 
   return new Client(axios.create(options));
 };
