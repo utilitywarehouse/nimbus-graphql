@@ -1,10 +1,10 @@
-import { BadRequestError, BaseError, ForbiddenError, InternalServerError, NotfoundError, UnauthorizedError } from '../errors';
+import { BadRequestError, BaseError, ForbiddenError, InternalServerError, NotFoundError, UnauthorizedError } from '../errors';
 
 export const httpErrorMapping: Record<number, typeof BaseError> = {
   400: BadRequestError,
   401: UnauthorizedError,
   403: ForbiddenError,
-  404: NotfoundError,
+  404: NotFoundError,
   500: InternalServerError,
 };
 
