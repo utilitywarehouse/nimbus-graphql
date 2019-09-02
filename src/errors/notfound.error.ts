@@ -1,3 +1,3 @@
 import { BaseError } from './base';
 
-export class NotfoundError extends BaseError {}
+export class NotFoundError extends BaseError {}
