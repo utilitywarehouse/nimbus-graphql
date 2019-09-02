@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createClient } from '../http.client';
 import { URL } from '../http.url';
-import { BadRequestError, ForbiddenError, InternalServerError, NotfoundError, TransportError, UnauthorizedError } from '../../errors';
+import { BadRequestError, ForbiddenError, InternalServerError, NotFoundError, TransportError, UnauthorizedError } from '../../errors';
 
 const mockRequest = jest.fn();
 mockRequest.mockResolvedValue('return');
@@ -167,7 +167,7 @@ describe('http client', () => {
 
     const client = createClient();
 
-    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(NotfoundError);
+    await expect(client.get('/url', { timeout: 10 })).rejects.toThrow(NotFoundError);
   });
 
   test('throws internal server error on response status code = 500', async () => {
