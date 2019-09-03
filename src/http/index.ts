@@ -1,2 +1,2 @@
-export { createClient } from './http.client';
+export { createClient, HttpClient } from './http.client';
 export { URL } from './http.url';
