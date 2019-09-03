@@ -1,6 +1,6 @@
 {
   "name": "nimbus-graphql",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "a GraphQL Framework with batteris included",
   "main": "index.js",
   "repository": "https://github.com/utilitywarehouse/nimbus",
