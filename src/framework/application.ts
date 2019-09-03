@@ -1,10 +1,10 @@
 import { Container, ContainerInstance } from 'typedi';
 import { createServer as createHttpServer, Server } from 'http';
+import { Express } from 'express';
 import Logger = require('bunyan');
 import { Module } from './module';
 import { Config } from '../config';
 import { LoggerFactory, Logger as LoggerToken } from '../logger';
-import { Express } from 'express';
 import { createExpressApp } from './express';
 
 /**
@@ -53,8 +53,8 @@ export class Application extends ContainerInstance {
   /**
    * Get Logger Instance
    */
-  logger(): typeof LoggerToken {
-    return this.get(LoggerToken) as typeof LoggerToken;
+  logger(): LoggerFactory {
+    return this.get(LoggerToken);
   }
 
   /**
