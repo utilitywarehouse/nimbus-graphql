@@ -53,7 +53,7 @@ export class Application extends ContainerInstance {
   /**
    * Get Logger Instance
    */
-  logger(): LoggerFactory {
+  logger(): Logger {
     return this.get(LoggerToken);
   }
 
