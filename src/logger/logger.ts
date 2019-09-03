@@ -1,7 +1,7 @@
 import * as bunyan from 'bunyan';
 import { Token } from 'typedi';
-import { RecordWriter } from './writer';
 import { LogLevelString } from 'bunyan';
+import { RecordWriter } from './writer';
 
 export type LoggerEntry = bunyan;
 
