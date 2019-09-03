@@ -22,9 +22,9 @@ enum Method {
 export interface HttpClient {
   get: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
   delete: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-  post: <T = { [k: string]: any }>(url: string | URL, data: Record<string, any>, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-  put: <T = { [k: string]: any }>(url: string | URL, data: Record<string, any>, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-  patch: <T = { [k: string]: any }>(url: string | URL, data: Record<string, any>, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  post: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  put: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  patch: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
 }
 
 
