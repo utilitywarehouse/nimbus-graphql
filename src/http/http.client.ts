@@ -12,16 +12,23 @@ const httpHistogram = new prom.Histogram({
 });
 
 enum Method {
-    GET = 'get',
-    DELETE = 'delete',
-    POST = 'post',
-    PATCH = 'patch',
-    PUT = 'put',
+  GET = 'get',
+  DELETE = 'delete',
+  POST = 'post',
+  PATCH = 'patch',
+  PUT = 'put',
 }
 
-type Data = Record<string, any>;
+export interface HttpClient {
+  get: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  delete: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  post: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  put: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+  patch: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+}
 
-class Client {
+
+class Client implements HttpClient {
   constructor(private readonly transport: AxiosInstance) {
   }
 
@@ -33,7 +40,7 @@ class Client {
     }
   }
 
-  private async execute<T>(method: Method, url: URL | string, data?: Data, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  private async execute<T>(method: Method, url: URL | string, data?: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     if (!options) {
       options = {};
     }
@@ -70,23 +77,23 @@ class Client {
     return response;
   }
 
-  get = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+  get = <T = { [k: string]: any }>(url: URL | string, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
     this.execute(Method.GET, url, undefined, options);
 
-  delete = <T = {[k: string]: any}>(url: URL | string, options?: AxiosRequestConfig) =>
+  delete = <T = { [k: string]: any }>(url: URL | string, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
     this.execute(Method.DELETE, url, undefined, options);
 
-  post = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+  post = <T = { [k: string]: any }>(url: URL | string, data: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
     this.execute(Method.POST, url, data, options);
 
-  put = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+  put = <T = { [k: string]: any }>(url: URL | string, data: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
     this.execute(Method.PUT, url, data, options);
 
-  patch = <T = {[k: string]: any}>(url: URL | string, data: Data, options?: AxiosRequestConfig) =>
+  patch = <T = { [k: string]: any }>(url: URL | string, data: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
     this.execute(Method.PATCH, url, data, options);
 }
 
-export const createClient = (options: AxiosRequestConfig = {}): Client => {
+export const createClient = (options: AxiosRequestConfig = {}): HttpClient => {
   options = {
     ...options,
     timeout: options.timeout || 3000,
