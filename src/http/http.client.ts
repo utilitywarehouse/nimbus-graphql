@@ -20,6 +20,7 @@ enum Method {
 }
 
 export interface HttpClient {
+  execute: <T>(method: Method, url: URL | string, data?: any, options?: AxiosRequestConfig) => Promise<AxiosResponse <T>>;
   get: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
   delete: <T = { [k: string]: any }>(url: string | URL, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
   post: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
@@ -40,7 +41,7 @@ class Client implements HttpClient {
     }
   }
 
-  private async execute<T>(method: Method, url: URL | string, data?: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  execute = async <T>(method: Method, url: URL | string, data?: any, options?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
     if (!options) {
       options = {};
     }
