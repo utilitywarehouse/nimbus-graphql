@@ -72,7 +72,8 @@ class Client implements HttpClient {
     timeRequest();
 
     if (response.status >= 400) {
-      throw new (getErrorFromStatusCode(response.status));
+      const errorFromStatusCode = getErrorFromStatusCode(response.status);
+      throw new errorFromStatusCode(response.data.toString());
     }
 
     return response;
