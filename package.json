@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.4.8",
+    "apollo-tracing": "^0.8.4",
     "axios": "^0.18.0",
     "bunyan": "^1.8.12",
     "event-iterator": "^1.2.0",
