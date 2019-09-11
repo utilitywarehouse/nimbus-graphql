@@ -155,7 +155,7 @@ export class GraphQLBuilder {
     const tracing = response.extensions && response.extensions.tracing;
 
     if (!tracing) {
-      return;
+      return [];
     }
 
     const tracingResolvers = tracing.execution.resolvers;
