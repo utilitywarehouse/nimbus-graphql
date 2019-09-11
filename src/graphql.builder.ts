@@ -1,4 +1,4 @@
-import { GraphQLError, ResponsePath, GraphQLType } from 'graphql';
+import { GraphQLError } from 'graphql';
 import * as fs from 'fs';
 import { merge, last } from 'lodash';
 import { Container } from 'typedi';
@@ -6,7 +6,7 @@ import { GraphQLDate, GraphQLDateTime, GraphQLTime } from 'graphql-iso-date';
 import { SubscriptionServerOptions } from 'apollo-server-core';
 import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
-import { ApolloServer, Config, CorsOptions } from 'apollo-server-express';
+import { ApolloServer, Config as ApolloServerConfig, CorsOptions } from 'apollo-server-express';
 import { TracingFormat } from 'apollo-tracing';
 
 import { ResolverRegistry } from './resolver.registry';
@@ -15,28 +15,19 @@ import { ResolverToken } from './resolver.token';
 import { Application } from './framework';
 import { GQLError } from './errors';
 
+type ResolverCall = TracingFormat['execution']['resolvers'];
+
+export type Config = ApolloServerConfig & {
+  traceOnlyCustomResolvers?: boolean;
+}
+
 export interface GraphQLOperations {
   onResponse(response: any): void;
-
   onError(error: GQLError): void;
 }
 
 export interface GraphQLContextBuilder {
   build(args: any): object;
-}
-
-
-// Not exported types from apollo-tracing
-// Can be found on `apollo-tracing/src/index.ts`
-type HighResolutionTime = [number, number];
-
-interface ResolverCall {
-  path: ResponsePath;
-  fieldName: string;
-  parentType: GraphQLType;
-  returnType: GraphQLType;
-  startOffset: HighResolutionTime;
-  endOffset?: HighResolutionTime;
 }
 
 const ExtensionInjectCorrelationIdToError = {
@@ -76,17 +67,9 @@ export class GraphQLBuilder {
   private gqlContext: GraphQLContextBuilder;
   private app: Application;
 
-  private traceOnlyCustomResolvers: boolean;
-
   constructor(container: Application, schemaPath?: string) {
     this.schemaPath = schemaPath;
     this.app = container;
-
-    try {
-      this.traceOnlyCustomResolvers = this.app.config().get('app.traceOnlyCustomResolvers');
-    } catch (e) {
-      this.traceOnlyCustomResolvers = false;
-    }
   }
 
   metrics(operations: GraphQLOperations): GraphQLBuilder {
@@ -139,7 +122,7 @@ export class GraphQLBuilder {
       },
       tracing: true,
       formatResponse: (response: any) => {
-        if (this.traceOnlyCustomResolvers) {
+        if (customConfig.traceOnlyCustomResolvers) {
           response.extensions.tracing.execution.resolvers = this.filterTracingResolvers(response, resolvers);
         }
 
@@ -168,18 +151,23 @@ export class GraphQLBuilder {
   }
 
   // Removes the automatic resolvers to not pollute the tracing information
-  private filterTracingResolvers(response: any, resolvers: any) {
-    const tracing = response.extensions.tracing;
-    const tracingResolvers: ResolverCall[] = tracing.execution.resolvers;
+  private filterTracingResolvers(response: {extensions?: {tracing?: TracingFormat}}, resolvers: object) {
+    const tracing = response.extensions && response.extensions.tracing;
+
+    if (!tracing) {
+      return;
+    }
+
+    const tracingResolvers = tracing.execution.resolvers;
 
     return tracingResolvers
       .filter((tracingResolver) => this.isMappedResolver(tracingResolver, resolvers));
   }
 
   // Checks if the given tracing resolver came from a implemented resolver or the automatic resolver
-  private isMappedResolver(tracingResolver: ResolverCall, resolvers: any) {
-    const parentType = tracingResolver.parentType.toString();
-    const key = last(tracingResolver.path as any) as any;
+  private isMappedResolver(tracingResolver: ResolverCall[0], resolvers: {[key: string]: any}) {
+    const parentType = tracingResolver.parentType;
+    const key = last(tracingResolver.path);
 
     const parent = resolvers[parentType];
 
