@@ -7,7 +7,7 @@ import { TransportError } from '../errors';
 const httpHistogram = new prom.Histogram({
   name: 'http_client_requests_seconds',
   help: 'measures http client request duration',
-  labelNames: ['url', 'status', 'method'],
+  labelNames: ['host', 'path', 'status', 'method', 'client'],
   buckets: [0.2, 0.5, 1, 1.5, 3, 5, 10],
 });
 
@@ -30,7 +30,7 @@ export interface HttpClient {
 
 
 class Client implements HttpClient {
-  constructor(private readonly transport: AxiosInstance) {
+  constructor(private readonly transport: AxiosInstance, private readonly clientName?: string) {
   }
 
   private static endpoint(url: URL | string): string {
@@ -46,10 +46,13 @@ class Client implements HttpClient {
       options = {};
     }
 
+    const host = this.transport.defaults ? this.transport.defaults.baseURL : '';
     const labels = {
-      url: url instanceof URL ? url.urlTemplate() : url,
+      host: host || '',
+      path: url instanceof URL ? url.urlTemplate() : url,
       status: 0,
       method: method.toString(),
+      client: this.clientName || '',
     };
 
     options.method = method;
@@ -90,11 +93,11 @@ class Client implements HttpClient {
     this.execute<T>(Method.PATCH, url, data, options);
 }
 
-export const createClient = (options: AxiosRequestConfig = {}) => {
+export const createClient = (options: AxiosRequestConfig = {}, clientName?: string) => {
   options = {
     ...options,
     timeout: options.timeout || 3000,
   };
 
-  return new Client(axios.create(options));
+  return new Client(axios.create(options), clientName);
 };
