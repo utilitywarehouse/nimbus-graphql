@@ -28,6 +28,7 @@ export interface HttpClient {
   patch: <T = { [k: string]: any }>(url: string | URL, data: any, options?: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
 }
 
+export type ClientOptions = AxiosRequestConfig & {clientName?: string}
 
 class Client implements HttpClient {
   constructor(private readonly transport: AxiosInstance, private readonly clientName?: string) {
@@ -93,11 +94,11 @@ class Client implements HttpClient {
     this.execute<T>(Method.PATCH, url, data, options);
 }
 
-export const createClient = (options: AxiosRequestConfig = {}, clientName?: string) => {
+export const createClient = (options: ClientOptions = {}) => {
   options = {
     ...options,
     timeout: options.timeout || 3000,
   };
 
-  return new Client(axios.create(options), clientName);
+  return new Client(axios.create(options), options.clientName);
 };
