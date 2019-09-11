@@ -122,8 +122,12 @@ export class GraphQLBuilder {
       },
       tracing: true,
       formatResponse: (response: any) => {
-        if (customConfig.traceOnlyCustomResolvers) {
-          response.extensions.tracing.execution.resolvers = this.filterTracingResolvers(response, resolvers);
+        if (
+          customConfig.traceOnlyCustomResolvers &&
+          response.extensions &&
+          response.extensions.tracing
+        ) {
+          response.extensions.tracing.execution.resolvers = this.filterTracingResolvers(response.extensions.tracing, resolvers);
         }
 
         if (this.gqlMetrics) {
@@ -151,13 +155,7 @@ export class GraphQLBuilder {
   }
 
   // Removes the automatic resolvers to not pollute the tracing information
-  private filterTracingResolvers(response: {extensions?: {tracing?: TracingFormat}}, resolvers: object) {
-    const tracing = response.extensions && response.extensions.tracing;
-
-    if (!tracing) {
-      return [];
-    }
-
+  private filterTracingResolvers(tracing: TracingFormat, resolvers: object) {
     const tracingResolvers = tracing.execution.resolvers;
 
     return tracingResolvers
@@ -165,7 +163,7 @@ export class GraphQLBuilder {
   }
 
   // Checks if the given tracing resolver came from a implemented resolver or the automatic resolver
-  private isMappedResolver(tracingResolver: ResolverCall[0], resolvers: {[key: string]: any}) {
+  private isMappedResolver(tracingResolver: ResolverCall[0], resolvers: Record<string, any>) {
     const parentType = tracingResolver.parentType;
     const key = last(tracingResolver.path);
 
