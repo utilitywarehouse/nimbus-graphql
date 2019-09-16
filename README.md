@@ -1,7 +1,8 @@
 # nimbus-graphql
 A GraphQL Framework with batteries included
 
-[![CircleCI](https://circleci.com/gh/utilitywarehouse/nimbus-graphql/tree/master.svg?style=svg)](https://circleci.com/gh/utilitywarehouse/nimbus-graphql/tree/master)
+![npm](https://img.shields.io/npm/v/nimbus-graphql)
+![CircleCI](https://img.shields.io/circleci/build/github/utilitywarehouse/nimbus-graphql)
 
 # Developing
 
