@@ -20,10 +20,13 @@ export const createExpressApp = (): express.Express => {
   });
 
   app.use((req: Request, res: Response, next) => {
-    const labels = { path: req.route.path, status: res.statusCode, method: req.method };
-    const timeRequest = httpHistogram.startTimer(labels);
+    if (req.path === '/graphql') {
+      const labels = { path: req.path, status: res.statusCode, method: req.method };
+      const timeRequest = httpHistogram.startTimer(labels);
 
-    res.on('finish', () => timeRequest({ ...labels, status: res.statusCode }));
+      res.on('finish', () => timeRequest({ ...labels, status: res.statusCode }));
+    }
+
     next();
   });
 
