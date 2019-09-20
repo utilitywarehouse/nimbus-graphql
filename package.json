@@ -1,6 +1,6 @@
 {
   "name": "nimbus-graphql",
-  "version": "1.4.0-beta3",
+  "version": "1.4.0-beta4",
   "description": "a GraphQL Framework with batteris included",
   "main": "index.js",
   "repository": "https://github.com/utilitywarehouse/nimbus",
