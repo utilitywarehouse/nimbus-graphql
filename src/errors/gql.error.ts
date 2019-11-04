@@ -13,7 +13,7 @@ export class GQLError extends BaseError {
 
     if (error.originalError instanceof BaseError) {
       err = new GQLError(error.originalError.message, error.originalError.constructor.name, error, error.originalError.previous);
-    } else if (error.originalError) {
+    } else if (error.originalError && Object.keys(error.originalError).length > 0) {
       err = new GQLError(error.originalError.message, error.originalError.constructor.name, error);
     } else {
       err = new GQLError(error.message, error.constructor.name, error);
@@ -33,6 +33,7 @@ export class GQLError extends BaseError {
     details.path = this.gql.path;
     details.extensions = this.gql.extensions;
 
+    details.extensions.exception = details.extensions.exception || {};
     details.extensions.exception.type = this.type;
     details.extensions.exception.message = this.message;
 
