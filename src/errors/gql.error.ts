@@ -33,16 +33,17 @@ export class GQLError extends BaseError {
     details.path = this.gql.path;
     details.extensions = this.gql.extensions;
 
-    details.extensions.exception = details.extensions.exception || {};
-    details.extensions.exception.type = this.type;
-    details.extensions.exception.message = this.message;
+    if (details.extensions) {
+      details.extensions.exception = details.extensions.exception || {};
+      details.extensions.exception.type = this.type;
+      details.extensions.exception.message = this.message;
 
-    if (this.previous && this.previous instanceof BaseError) {
-      details.extensions.exception.previous = this.previous.render();
-    } else if (this.previous && this.previous.message) {
-      details.extensions.exception.previous = this.previous.message;
+      if (this.previous && this.previous instanceof BaseError) {
+        details.extensions.exception.previous = this.previous.render();
+      } else if (this.previous && this.previous.message) {
+        details.extensions.exception.previous = this.previous.message;
+      }
     }
-
     return details;
   }
 }
