@@ -8,7 +8,7 @@ import * as GraphQLJSON from 'graphql-type-json';
 import { GraphQLUUID } from 'graphql-custom-types';
 import { ApolloServer, Config as ApolloServerConfig, CorsOptions } from 'apollo-server-express';
 import { TracingFormat } from 'apollo-tracing';
-
+import { buildFederatedSchema } from '@apollo/federation';
 import { ResolverRegistry } from './resolver.registry';
 import { ResolverInterface } from './resolver.interface';
 import { ResolverToken } from './resolver.token';
@@ -19,6 +19,7 @@ type ResolverCall = TracingFormat['execution']['resolvers'];
 
 export type Config = ApolloServerConfig & {
   traceOnlyCustomResolvers?: boolean;
+  federated?: boolean;
 }
 
 export interface GraphQLOperations {
@@ -107,9 +108,21 @@ export class GraphQLBuilder {
       UUID: GraphQLUUID,
     }).resolverMap();
 
+    let schemaDef = {};
+
+    if (customConfig.federated) {
+      schemaDef = {
+        schema: buildFederatedSchema([{ typeDefs, resolvers }]),
+      };
+    } else {
+      schemaDef = {
+        typeDefs,
+        resolvers,
+      }
+    }
+
     return merge({
-      typeDefs,
-      resolvers,
+      ...schemaDef,
 
       extensions: [(): any => ExtensionInjectCorrelationIdToError],
       context: (args: any) => this.gqlContext.build(args),
