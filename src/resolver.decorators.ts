@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { IFieldResolver } from 'graphql-tools';
 import { ResolverToken } from './resolver.token';
 import { ResolverMetadata } from './resolver.metadata';
-import { NullError } from './errors';
+import { NullError, ForbiddenError } from './errors';
 
 export const Resolver = (type?: string): ClassDecorator => (target): void => {
   if (type) {
@@ -82,6 +82,28 @@ export const MustAuth = (...scopes: string[]): any => {
   return Before<any, any, any>((source, args, context) => {
     if (!context.config.get('auth.bypass')) {
       context.authValidator.mustPass(context.authToken, scopes);
+    }
+  });
+};
+
+export const MustAuthWithOneOfScopes = (...scopes: string[]): any => {
+  return Before<any, any, any>((source, args, context) => {
+    if (!context.config.get('auth.bypass')) {
+      context.authValidator.mustPass(context.authToken, []);
+
+      const payload = context.authToken.payload();
+
+      if (!payload) {
+        throw new ForbiddenError();
+      }
+
+      for (const scope of scopes) {
+        if (payload.scopes && payload.scopes.indexOf(scope) !== -1) {
+          return true;
+        }
+      }
+
+      throw new ForbiddenError();
     }
   });
 };
