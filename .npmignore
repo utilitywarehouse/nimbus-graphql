@@ -1,3 +1,7 @@
 src/
 scripts/
 dist/
+.idea/
+.circleci/
+coverage/
+reports/
