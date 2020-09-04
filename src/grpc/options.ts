@@ -1,11 +1,10 @@
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 
-interface CallOptions {
+interface CallOptions extends grpc.CallOptions {
     timeout?: number;
-    [key: string]: any;
 }
 
-export function options(opt: CallOptions): Partial<grpc.CallOptions> {
+export function options(opt: CallOptions): grpc.CallOptions {
   const opts = {
     ...opt,
   };

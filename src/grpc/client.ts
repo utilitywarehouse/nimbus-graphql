@@ -1,4 +1,4 @@
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import { Pool, PoolStatus } from './pool';
 import { CheckerReporter } from '../operational';
 import { RepositoryContext } from '../repository';
