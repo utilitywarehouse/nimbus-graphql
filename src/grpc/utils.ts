@@ -1,6 +1,6 @@
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import { TransportError } from '../errors';
-import { Call } from 'grpc';
+import { Call } from '@grpc/grpc-js';
 
 export type gRPCHandler<T> = (error: grpc.ServiceError | null, response: T) => void;
 
